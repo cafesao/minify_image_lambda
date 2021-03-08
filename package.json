@@ -1,0 +1,8 @@
+{
+  "name": "minify_image_lambda",
+  "version": "1.0.0",
+  "main": "minify.js",
+  "repository": "git@github.com:cafesao/minify_image_lambda.git",
+  "author": "GabrielDiasDutra <gabriel.dutra@ezops.com.br>",
+  "license": "MIT"
+}
