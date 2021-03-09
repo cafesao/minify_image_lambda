@@ -5,7 +5,7 @@ Parameters:
   NameApp:
     Type: String
     Description: Nome do App
-    Default: optimize-image
+    Default: optimize
 
 Resources:
   IAMRoleLambda:
@@ -37,52 +37,28 @@ Resources:
         S3Bucket:
           Fn::ImportValue: S3BucketName
         S3Key: minify.zip
+      Description: Função responsável por otimizar imagens
       Handler: minify.handle
+      MemorySize: 256
       Role: !GetAtt IAMRoleLambda.Arn
       Runtime: nodejs14.x
 
-  S3BucketImage:
-    Type: AWS::S3::Bucket
-    DependsOn: BucketPermission
+  SSMParameterBucket:
+    Type: AWS::SSM::Parameter
     Properties:
-      BucketName: !Sub ${NameApp}-bucket-image
-      NotificationConfiguration:
-        LambdaConfigurations:
-          - Event: 's3:ObjectCreated:*'
-            Filter:
-              S3Key:
-                Rules:
-                  - Name: prefix
-                    Value: uploads/
-                  - Name: suffix
-                    Value: .png
-            Function: !GetAtt AppLambda.Arn
+      Description: Nome da Função Lambda
+      Name: !Sub /Lambda/${NameApp}/LambdaName
+      Type: String
+      Value: !Ref AppLambda
 
-          - Event: 's3:ObjectCreated:*'
-            Filter:
-              S3Key:
-                Rules:
-                  - Name: prefix
-                    Value: uploads/
-                  - Name: suffix
-                    Value: .jpg
-            Function: !GetAtt AppLambda.Arn
-
-          - Event: 's3:ObjectCreated:*'
-            Filter:
-              S3Key:
-                Rules:
-                  - Name: prefix
-                    Value: uploads/
-                  - Name: suffix
-                    Value: .jpeg
-            Function: !GetAtt AppLambda.Arn
-
-  BucketPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: 'lambda:InvokeFunction'
-      FunctionName: !Ref AppLambda
-      Principal: s3.amazonaws.com
-      SourceAccount: !Ref 'AWS::AccountId'
-      SourceArn: !Sub 'arn:aws:s3:::${NameApp}-bucket-image'
+Outputs:
+  LambdaARM:
+    Description: ARM da função Lambda
+    Value: !GetAtt AppLambda.Arn
+    Export:
+      Name: LambdaARM
+  LambdaName:
+    Description: Nome da função Lambda
+    Value: !Ref AppLambda
+    Export:
+      Name: LambdaName
