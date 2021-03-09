@@ -1,0 +1,66 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: S3 Image After
+
+Parameters:
+  NameApp:
+    Type: String
+    Description: Nome do App
+    Default: optimize
+
+Resources:
+  S3BucketImage:
+    Type: AWS::S3::Bucket
+    DependsOn: BucketPermission
+    Properties:
+      BucketName: !Sub ${NameApp}-bucket-image
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: 's3:ObjectCreated:*'
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: uploads/
+                  - Name: suffix
+                    Value: .png
+            Function:
+              Fn::ImportValue: LambdaARM
+
+          - Event: 's3:ObjectCreated:*'
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: uploads/
+                  - Name: suffix
+                    Value: .jpg
+            Function:
+              Fn::ImportValue: LambdaARM
+
+          - Event: 's3:ObjectCreated:*'
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: uploads/
+                  - Name: suffix
+                    Value: .jpeg
+            Function:
+              Fn::ImportValue: LambdaARM
+
+  BucketPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !ImportValue LambdaName
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref 'AWS::AccountId'
+      SourceArn: !Sub 'arn:aws:s3:::${NameApp}-bucket-image'
+
+  SSMParameterBucket:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: Nome do bucket S3
+      Name: !Sub /Lambda/${NameApp}/S3BucketName
+      Type: String
+      Value: !Ref S3BucketImage

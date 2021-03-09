@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: S3 Image After
+
+Parameters:
+  NameApp:
+    Type: String
+    Description: Nome do App
+    Default: optimize
+
+Resources:
+  S3BucketImage:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${NameApp}-bucket-image
+
+  SSMParameterBucket:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: Nome do bucket S3
+      Name: !Sub /Lambda/${NameApp}/S3BucketName
+      Type: String
+      Value: !Ref S3BucketImage

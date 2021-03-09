@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: S3 Code
+
+Parameters:
+  NameApp:
+    Type: String
+    Description: Nome do App
+    Default: optimize
+
+Resources:
+  S3BucketCode:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${NameApp}-s3-code
+
+Outputs:
+  S3BucketName:
+    Value: !Ref S3BucketCode
+    Description: Nome do bucket
+    Export:
+      Name: S3BucketName
